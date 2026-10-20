@@ -17,7 +17,7 @@ void addSettingsColors(ColorMixer& mixer, const Theme& theme)
     const bool dark = theme.darkMode;
 
     mixer[SettingsColor::SidebarBackground] =
-        withAlpha(dark ? lighter(ColorId::Background, 1.5) : darker(ColorId::Background, 1.05), 0.7);
+        withAlpha(dark ? lighter(ColorId::Background, 1.5) : darker(ColorId::Background, 1.05), 0.15);
     mixer[SettingsColor::SidebarItemCurrent] = withAlpha(ColorId::Text, dark ? 0.1 : 0.05);
 
     mixer[SettingsColor::RowHighlight] = withAlpha(ColorId::Text, dark ? 0.05 : 0.15);

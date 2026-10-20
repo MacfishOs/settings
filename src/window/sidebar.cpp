@@ -551,13 +551,12 @@ void Sidebar::layout()
     const double width = geometry().width;
     const double height = geometry().height;
     const bool active = windowActive(this);
-    // The title's line is the file manager's sidebar title's: centred in the
-    // header height, pushed down by smallSpacing.
-    const double titleHeight = 40 + metrics::m;
-    const double titleLeft = metrics::sidebarMargin + metrics::sidebarItemPadding;
+    const double titleHeight = 46.0;
+    // Push the title left margin to 76 to avoid overlapping with macOS style traffic light buttons
+    const double titleLeft = std::max(metrics::sidebarMargin + metrics::sidebarItemPadding, 76.0);
     m_title->setColor(active ? theme.text : theme.disabledText);
-    m_title->setGeometry({titleLeft, theme.smallSpacing, std::max(0.0, width - 2 * titleLeft),
-                          titleHeight - theme.smallSpacing - metrics::m});
+    m_title->setGeometry({titleLeft, 0.0, std::max(0.0, width - titleLeft - metrics::sidebarMargin),
+                          titleHeight});
     const double searchTop = titleHeight + metrics::xs;
     m_search->setGeometry({metrics::sidebarMargin, searchTop, width - 2 * metrics::sidebarMargin, kSearchHeight});
     const double listTop = searchTop + kSearchHeight;
