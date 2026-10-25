@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Settings
 Exec=/usr/bin/cutefish-settings
-Icon=preferences-system
+Icon=settings
 Terminal=false
 Type=Application
 StartupNotify=true
