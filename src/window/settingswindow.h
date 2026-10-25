@@ -97,7 +97,6 @@ private:
     Sidebar* m_sidebar;
     cutefish::ui::HeaderButton* m_back;
     cutefish::ui::HeaderButton* m_forward;
-    cutefish::ui::Label* m_title;
     Page* m_page = nullptr;
     std::vector<HistoryEntry> m_history;
     int m_historyIndex = -1;

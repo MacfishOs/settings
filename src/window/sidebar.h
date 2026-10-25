@@ -47,9 +47,6 @@ public:
     // the focus off it.
     void releaseSearch(cutefish::ui::PointF windowPosition);
 
-    // The title's text, laid out as the header's title lines up with it.
-    cutefish::ui::Label* titleLabel() const { return m_title; }
-
     // A click on a sidebar page, or a search result opened.
     std::function<void(const std::string& page, const std::string& rootPage)> onActivated;
 
@@ -76,7 +73,6 @@ private:
     int m_currentResult = -1;
     std::string m_currentPage;
     std::string m_currentRootPage;
-    cutefish::ui::Label* m_title;
     SearchField* m_search;
     cutefish::ui::ScrollView* m_listScroll;
     SidebarList* m_list;

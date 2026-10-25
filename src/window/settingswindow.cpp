@@ -47,8 +47,6 @@ static double sidebarWidth(double scale)
 
 // The header's own part before the window buttons: a RowLayout of back,
 // forward and the page title, anchored from the sidebar's edge. The title is
-// FishUI's AlignedLabel on the sidebar title's baseline; the buttons stay
-// centred on its capitals.
 class HeaderBar : public View
 {
 public:
@@ -66,14 +64,10 @@ public:
         // Settings' NavigationButton plates.
         for (HeaderButton* button : {back, forward})
             button->setPlateAlphas({0.17, 0.26}, {0.21, 0.15});
-        title = m_row->addChild<Label>();
-        title->setName("title");
-        title->setFontSize(metrics::points(metrics::headerTitlePointSize));
     }
 
     HeaderButton* back;
     HeaderButton* forward;
-    Label* title;
 
 protected:
     void layout() override
@@ -82,13 +76,7 @@ protected:
         const Window* window = this->window();
         const double scale = window ? window->scale() : 1;
         const auto snap = [scale](double value) { return std::round(value * scale) / scale; };
-        // Header and sidebar share the window's top edge. The title reads low
-        // on the sidebar title's baseline, so it sits 1px above it.
-        const double titleRaise = 1;
-        Label* sidebarTitle = m_sidebar->titleLabel();
-        const double textBaseline = sidebarTitle->geometry().y + sidebarTitle->baselineOffset() - titleRaise;
-        const double capCenter = snap(snap(textBaseline) - title->capHeight() / 2);
-        const double buttonTop = capCenter + titleRaise - kButtonSize / 2;
+        const double buttonTop = snap((SettingsWindow::headerHeight - kButtonSize) / 2.0);
 
         LayoutHints button{.preferredWidth = kButtonSize, .preferredHeight = kButtonSize,
                            .verticalAlignment = Alignment::Start};
@@ -97,13 +85,7 @@ protected:
             back->setLayoutHints(button);
             forward->setLayoutHints(button);
         }
-        LayoutHints text{.fillWidth = true, .verticalAlignment = Alignment::Start};
-        text.margins = {theme.smallSpacing, snap(textBaseline - title->baselineOffset()), 0, 0};
-        if (!(title->layoutHints().margins == text.margins))
-            title->setLayoutHints(text);
 
-        const bool active = !window || window->isActive();
-        title->setColor(active ? theme.text : theme.disabledText);
         const double left = sidebarWidth(scale) + theme.smallSpacing * 1.5;
         m_row->setGeometry({left, 0, std::max(0.0, geometry().width - left - theme.smallSpacing),
                             geometry().height});
@@ -213,7 +195,6 @@ SettingsWindow::SettingsWindow()
     m_sidebar = m_root->sidebar;
     m_back = m_root->bar->back;
     m_forward = m_root->bar->forward;
-    m_title = m_root->bar->title;
     m_window->setContentView(std::move(root));
     m_root->onLayout = [this] { updateBackground(); };
 
@@ -386,7 +367,6 @@ void SettingsWindow::updateHeader()
 {
     m_back->setEnabled(canGoBack());
     m_forward->setEnabled(canGoForward());
-    m_title->setText(m_page ? m_page->title() : std::string());
 }
 
 void SettingsWindow::updateBackground()

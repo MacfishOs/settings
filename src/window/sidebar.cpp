@@ -48,6 +48,7 @@ public:
         m_title = addChild<Label>(tr(page.title.c_str()));
         m_title->setFontSize(metrics::points(kItemPointSize));
         m_title->setVerticallyCentered(true);
+        setTracksHover(true);
     }
 
     const PageInfo& page() const { return m_page; }
@@ -88,14 +89,11 @@ protected:
     void paint(Painter& painter) override
     {
         const Theme& theme = Theme::current();
-        // The current entry carries the list's highlight under its own fill,
-        // as the Qt version's list did.
-        if (m_current)
-            painter.drawRoundedRect(localRect(), {theme.mediumRadius, 0, themeCorners()}, theme.text.withAlpha(0.05));
-        if (m_pressed || m_current) {
-            painter.drawSmoothRectangle(
-                localRect(), theme.mediumRadius,
-                m_pressed ? color(ColorId::ItemPressed) : color(SettingsColor::SidebarItemCurrent));
+        const RectF r = {8.0, 3.0, localRect().width - 16.0, localRect().height - 6.0};
+        if (m_current) {
+            painter.fillRoundedRect(r, 6.0, theme.text.withAlpha(theme.darkMode ? 0.15 : 0.10));
+        } else if (isHovered() || m_pressed) {
+            painter.fillRoundedRect(r, 6.0, theme.text.withAlpha(theme.darkMode ? 0.08 : 0.05));
         }
     }
 
@@ -268,9 +266,6 @@ private:
 
 Sidebar::Sidebar()
 {
-    m_title = addChild<Label>(tr("Settings"));
-    m_title->setFontSize(metrics::points(kTitlePointSize));
-    m_title->setVerticallyCentered(true);
     m_search = addChild<SearchField>();
     m_search->setName("search");
     m_search->onTextChanged = [this] { updateResults(); };
@@ -318,7 +313,6 @@ void Sidebar::setEntries(std::vector<const PageInfo*> entries)
 
 void Sidebar::retranslate()
 {
-    m_title->setText(tr("Settings"));
     m_search->setPlaceholder(tr("Search"));
     m_noResults->setText(tr("No results"));
     setEntries(m_entries);
@@ -550,16 +544,9 @@ void Sidebar::layout()
     const Theme& theme = Theme::current();
     const double width = geometry().width;
     const double height = geometry().height;
-    const bool active = windowActive(this);
-    const double titleHeight = 46.0;
-    // Push the title left margin to 76 to avoid overlapping with macOS style traffic light buttons
-    const double titleLeft = std::max(metrics::sidebarMargin + metrics::sidebarItemPadding, 76.0);
-    m_title->setColor(active ? theme.text : theme.disabledText);
-    m_title->setGeometry({titleLeft, 0.0, std::max(0.0, width - titleLeft - metrics::sidebarMargin),
-                          titleHeight});
-    const double searchTop = titleHeight + metrics::xs;
+    const double searchTop = 46.0;
     m_search->setGeometry({metrics::sidebarMargin, searchTop, width - 2 * metrics::sidebarMargin, kSearchHeight});
-    const double listTop = searchTop + kSearchHeight;
+    const double listTop = searchTop + kSearchHeight + metrics::xs;
     m_listScroll->setGeometry({0, listTop, width, height - listTop});
     m_resultsScroll->setGeometry({0, listTop, width, height - listTop});
     m_noResults->setColor(theme.disabledText);
