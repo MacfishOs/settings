@@ -37,6 +37,7 @@ static constexpr const char* kGeneral = trNoop("General");
 static constexpr const char* kWindows = trNoop("Windows");
 static constexpr const char* kDesks = trNoop("Desks");
 static constexpr const char* kScreenshots = trNoop("Screenshots and Recording");
+static constexpr const char* kMedia = trNoop("Media");
 static const Layout kLayouts[] = {
         {"toggle-app-list", kGeneral, trNoop("Open the launcher")},
         {"lock-screen", kGeneral, trNoop("Lock the screen")},
@@ -79,6 +80,11 @@ static const Layout kLayouts[] = {
         {"take-partial-screenshot-to-clipboard", kScreenshots, trNoop("Copy a picture of the selected area")},
         {"start-capture-mode", kScreenshots, trNoop("Screenshot and recording options")},
         {"stop-screen-recording", kScreenshots, trNoop("Stop screen recording")},
+
+        {"media-play-pause", kMedia, trNoop("Play or pause media")},
+        {"media-next-track", kMedia, trNoop("Next track")},
+        {"media-prev-track", kMedia, trNoop("Previous track")},
+        {"media-stop", kMedia, trNoop("Stop media")},
 };
 
 // The keysyms of the keys the Qt version had a Qt key code for besides the
@@ -87,7 +93,7 @@ static const std::map<uint32_t, uint32_t> kServiceKeysyms = {
         {XKB_KEY_Escape, 0xff1b},      {XKB_KEY_Tab, 0xff09},         {XKB_KEY_ISO_Left_Tab, 0xfe20},
         {XKB_KEY_BackSpace, 0xff08},   {XKB_KEY_Return, 0xff0d},      {XKB_KEY_KP_Enter, 0xff8d},
         {XKB_KEY_Insert, 0xff63},      {XKB_KEY_Delete, 0xffff},      {XKB_KEY_Pause, 0xff13},
-        {XKB_KEY_Print, 0xff61},       {XKB_KEY_Home, 0xff50},        {XKB_KEY_End, 0xff57},
+        {XKB_KEY_Print, 0xff61},       {XKB_KEY_Sys_Req, 0xff61},     {XKB_KEY_Home, 0xff50},        {XKB_KEY_End, 0xff57},
         {XKB_KEY_Left, 0xff51},        {XKB_KEY_Up, 0xff52},          {XKB_KEY_Right, 0xff53},
         {XKB_KEY_Down, 0xff54},        {XKB_KEY_Prior, 0xff55},       {XKB_KEY_Next, 0xff56},
         {XKB_KEY_Menu, 0xff67},        {XKB_KEY_Meta_L, 0xffeb},      {XKB_KEY_Meta_R, 0xffeb},
@@ -97,6 +103,8 @@ static const std::map<uint32_t, uint32_t> kServiceKeysyms = {
         {XKB_KEY_XF86AudioStop, 0x1008ff15},        {XKB_KEY_XF86AudioPrev, 0x1008ff16},
         {XKB_KEY_XF86AudioNext, 0x1008ff17},        {XKB_KEY_XF86MonBrightnessUp, 0x1008ff02},
         {XKB_KEY_XF86MonBrightnessDown, 0x1008ff03}, {XKB_KEY_XF86Calculator, 0x1008ff1d},
+        {XKB_KEY_XF86AudioPause, 0x1008ff31},       {XKB_KEY_XF86AudioMicMute, 0x1008ffb2},
+        {XKB_KEY_XF86KbdBrightnessUp, 0x1008ff04},  {XKB_KEY_XF86KbdBrightnessDown, 0x1008ff05},
 };
 
 ShortcutsModel::ShortcutsModel()
@@ -114,7 +122,7 @@ ShortcutsModel::~ShortcutsModel()
 
 std::vector<std::string> ShortcutsModel::categories()
 {
-    return {kGeneral, kWindows};
+    return {kGeneral, kWindows, kDesks, kScreenshots, kMedia};
 }
 
 void ShortcutsModel::reload()
@@ -187,13 +195,17 @@ std::string ShortcutsModel::keyDisplay(const std::string& keyName, const std::st
             {"Prior", trc("key", "Page Up")},
             {"Next", trc("key", "Page Down")},
             {"Print", trc("key", "Print Screen")},
+            {"Sys_Req", trc("key", "Print Screen")},
             {"Tab", trc("key", "Tab")},
             {"Menu", trc("key", "Menu")},
             {"XF86AudioRaiseVolume", trc("key", "Volume Up")},
             {"XF86AudioLowerVolume", trc("key", "Volume Down")},
             {"XF86AudioMute", trc("key", "Mute")},
+            {"XF86AudioMicMute", trc("key", "Mic Mute")},
             {"XF86MonBrightnessUp", trc("key", "Brightness Up")},
             {"XF86MonBrightnessDown", trc("key", "Brightness Down")},
+            {"XF86KbdBrightnessUp", trc("key", "Keyboard Brightness Up")},
+            {"XF86KbdBrightnessDown", trc("key", "Keyboard Brightness Down")},
             {"XF86AudioPlay", trc("key", "Play/Pause")},
             {"XF86AudioPause", trc("key", "Pause")},
             {"XF86AudioNext", trc("key", "Next Track")},
@@ -412,6 +424,10 @@ uint32_t ShortcutsModel::serviceKeysym(uint32_t keysym)
 {
     if (const auto it = kServiceKeysyms.find(keysym); it != kServiceKeysyms.end())
         return it->second;
+    if (keysym == XKB_KEY_Sys_Req)
+        return 0xff61;
+    if (keysym >= 0x10080001 && keysym <= 0x1008ffff)
+        return keysym;
     if (keysym >= XKB_KEY_F1 && keysym <= XKB_KEY_F35)
         return keysym;
     // The keypad's digits are Qt's digit keys.
